@@ -257,5 +257,8 @@ export function initCartUi() {
 	bindAddToCart();
 	bindCartChrome();
 	window.addEventListener("loja-cart", syncAll);
+	window.addEventListener("storage", (e) => {
+		if (e.key === "loja-oficial-cart-v1") syncAll();
+	});
 	syncAll();
 }
