@@ -238,9 +238,10 @@ async function loadPixCharge() {
 		});
 
 		const qrcodeBase64 = data?.data?.pix?.qrcode_base64 ?? "";
-		const qr = document.querySelector<HTMLImageElement>("img.qrcode");
-		if (qr && qrcodeBase64) {
-			qr.src = `data:image/png;base64,${qrcodeBase64}`;
+		if (qrcodeBase64) {
+			document.querySelectorAll<HTMLImageElement>("img.qrcode").forEach((qr) => {
+				qr.src = `data:image/png;base64,${qrcodeBase64}`;
+			});
 		}
 
 		showLoader(false);
@@ -258,6 +259,9 @@ async function loadPixCharge() {
 }
 
 export function initPixCheckoutPage() {
+	// Força a página a carregar sempre no topo, evitando scroll para o carrinho/detalhes
+	window.scrollTo(0, 0);
+
 	wireCopy();
 	wireCollapse();
 

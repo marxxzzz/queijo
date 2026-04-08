@@ -7,6 +7,8 @@ import products from "../../data/products.json";
 import type { Product } from "../../lib/price";
 import { discountPercent } from "../../lib/price";
 
+export const prerender = true;
+
 export function getStaticPaths() {
 	const list = products as Product[];
 	return list.map((product) => ({
