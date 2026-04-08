@@ -180,6 +180,19 @@ async function loadPixCharge() {
 		const customer = (checkout.customer as Record<string, string>) || {};
 		const shipping = (checkout.shipping as Record<string, string>) || {};
 
+		// Sanitiza os campos do buyer antes de enviar para a BuckPay
+		const rawDocument = (customer.document ?? "").replace(/\D/g, "");
+		const rawPhone = (customer.phone ?? customer.telephone ?? "").replace(/\D/g, "");
+		const buyerPhone = rawPhone
+			? rawPhone.startsWith("55") ? rawPhone : `55${rawPhone}`
+			: "";
+
+		const buyer: Record<string, string> = {};
+		if (customer.name?.trim()) buyer.name = customer.name.trim();
+		if (customer.email?.trim()) buyer.email = customer.email.trim();
+		if (rawDocument.length === 11 || rawDocument.length === 14) buyer.document = rawDocument;
+		if (buyerPhone.length >= 12 && buyerPhone.length <= 13) buyer.phone = buyerPhone;
+
 		// Chama o proxy server-side (evita CORS — a BuckPay só aceita chamadas servidor-a-servidor)
 		const amountCents = Math.max(600, Math.round(amount * 100));
 		const proxyRes = await fetch("/api/pix-charge/", {
@@ -189,7 +202,7 @@ async function loadPixCharge() {
 				external_id: `loja-${Date.now()}`,
 				payment_method: "pix",
 				amount: amountCents,
-				...(Object.keys(customer).length > 0 ? { buyer: customer } : {}),
+				...(Object.keys(buyer).length > 0 ? { buyer } : {}),
 			}),
 		});
 
