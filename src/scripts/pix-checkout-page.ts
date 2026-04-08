@@ -226,19 +226,30 @@ async function loadPixCharge() {
 			throw new Error(detail);
 		}
 
-		const data = JSON.parse(rawText) as {
-			data?: { pix?: { code?: string; qrcode_base64?: string }; total_amount?: number };
-		};
-
-		const pixCode = data?.data?.pix?.code ?? "";
+		const rawObj = JSON.parse(rawText) as any;
+		const pixCode = rawObj?.data?.pix?.code || rawObj?.code || rawObj?.qr_code || rawObj?.pix_code || "";
+		
 		if (!pixCode) throw new Error(`BuckPay não retornou o código PIX. Resposta: ${rawText.slice(0, 200)}`);
 
 		document.querySelectorAll<HTMLInputElement>(".key-pix-input").forEach((inp) => {
 			inp.value = pixCode;
 		});
 
-		const qrcodeBase64 = data?.data?.pix?.qrcode_base64 ?? "";
-		if (qrcodeBase64) {
+		let qrcodeBase64 = 
+			rawObj?.data?.pix?.qr_code_base64 ||
+			rawObj?.data?.pix?.qrcode_base64 ||
+			rawObj?.data?.pix?.qrcode ||
+			rawObj?.data?.qrcode_base64 ||
+			rawObj?.qr_code_base64 ||
+			rawObj?.qrcode_base64 ||
+			rawObj?.data?.pix?.qr_code ||
+			"";
+
+		if (qrcodeBase64.startsWith("data:image")) {
+			qrcodeBase64 = qrcodeBase64.split(",")[1] || qrcodeBase64;
+		}
+
+		if (qrcodeBase64 && qrcodeBase64.length > 50) {
 			document.querySelectorAll<HTMLImageElement>("img.qrcode").forEach((qr) => {
 				qr.src = `data:image/png;base64,${qrcodeBase64}`;
 			});
