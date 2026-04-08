@@ -220,9 +220,13 @@
 			}
 
 			/* Força auto height na estrutura do card para evitar sobreposição */
-			.card.thanks {
+			.card.thanks,
+			.content-pix-mobile,
+			.content-pix-web,
+			.content-pix,
+			.pix-when-active {
 				height: auto !important;
-				min-height: auto !important;
+				min-height: max-content !important;
 				overflow: visible !important;
 			}
 

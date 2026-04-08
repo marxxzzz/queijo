@@ -245,13 +245,15 @@ async function loadPixCharge() {
 			rawObj?.data?.pix?.qr_code ||
 			"";
 
-		if (qrcodeBase64.startsWith("data:image")) {
-			qrcodeBase64 = qrcodeBase64.split(",")[1] || qrcodeBase64;
-		}
+		if (qrcodeBase64) {
+			let srcUrl = qrcodeBase64;
+			if (!qrcodeBase64.startsWith("http") && !qrcodeBase64.startsWith("data:image")) {
+				srcUrl = `data:image/png;base64,${qrcodeBase64}`;
+			}
 
-		if (qrcodeBase64 && qrcodeBase64.length > 50) {
 			document.querySelectorAll<HTMLImageElement>("img.qrcode").forEach((qr) => {
-				qr.src = `data:image/png;base64,${qrcodeBase64}`;
+				qr.setAttribute("src", srcUrl);
+				qr.style.setProperty("display", "block", "important");
 			});
 		}
 
