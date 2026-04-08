@@ -202,6 +202,7 @@
 
 			/* Countdown abaixo do botão */
 			.pix-countdown-label {
+				box-sizing: border-box;
 				font-size: 13px;
 				color: #555;
 				margin-top: 14px;
@@ -216,6 +217,13 @@
 			.pix-countdown-label span {
 				font-weight: 700;
 				color: #b20000;
+			}
+
+			/* Força auto height na estrutura do card para evitar sobreposição */
+			.card.thanks {
+				height: auto !important;
+				min-height: auto !important;
+				overflow: visible !important;
 			}
 
 			/* ── Mensagens de erro / API ─────────────────────── */
