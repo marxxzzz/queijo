@@ -193,21 +193,32 @@ async function loadPixCharge() {
 			}),
 		});
 
+		const rawText = await proxyRes.text();
+		console.log("[pix-charge] status:", proxyRes.status, "body:", rawText);
+
 		if (!proxyRes.ok) {
 			let detail = `Erro ${proxyRes.status} ao gerar Pix.`;
 			try {
-				const errJson = (await proxyRes.json()) as { error?: { detail?: string; message?: string } };
-				detail = errJson?.error?.detail ?? errJson?.error?.message ?? detail;
+				const errJson = JSON.parse(rawText) as {
+					error?: { detail?: unknown; message?: string };
+				};
+				const d = errJson?.error?.detail;
+				const m = errJson?.error?.message;
+				if (d !== undefined && d !== null) {
+					detail = typeof d === "string" ? d : JSON.stringify(d);
+				} else if (m) {
+					detail = m;
+				}
 			} catch { /* sem JSON */ }
 			throw new Error(detail);
 		}
 
-		const data = (await proxyRes.json()) as {
+		const data = JSON.parse(rawText) as {
 			data?: { pix?: { code?: string; qrcode_base64?: string }; total_amount?: number };
 		};
 
 		const pixCode = data?.data?.pix?.code ?? "";
-		if (!pixCode) throw new Error("BuckPay não retornou o código PIX (data.pix.code).");
+		if (!pixCode) throw new Error(`BuckPay não retornou o código PIX. Resposta: ${rawText.slice(0, 200)}`);
 
 		document.querySelectorAll<HTMLInputElement>(".key-pix-input").forEach((inp) => {
 			inp.value = pixCode;
