@@ -1,4 +1,4 @@
-import { hasPixApiConfigured, requestPixCharge } from "./pix-api";
+import { hasPixApiConfigured } from "./pix-api";
 
 const CART_KEY = "loja-oficial-cart-v1";
 const CHECKOUT_KEY = "loja-checkout-payload";
@@ -180,33 +180,47 @@ async function loadPixCharge() {
 		const customer = (checkout.customer as Record<string, string>) || {};
 		const shipping = (checkout.shipping as Record<string, string>) || {};
 
-		const res = await requestPixCharge({
-			amount,
-			items: lines.map((l) => ({
-				slug: l.slug,
-				title: l.title,
-				quantity: l.quantity,
-				unitPrice: l.unitPrice,
-			})),
-			customer,
-			shipping,
-			reference: `loja-${Date.now()}`,
+		// Chama o proxy server-side (evita CORS — a BuckPay só aceita chamadas servidor-a-servidor)
+		const amountCents = Math.max(600, Math.round(amount * 100));
+		const proxyRes = await fetch("/api/pix-charge/", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				external_id: `loja-${Date.now()}`,
+				payment_method: "pix",
+				amount: amountCents,
+				...(Object.keys(customer).length > 0 ? { buyer: customer } : {}),
+			}),
 		});
 
-		const copy = res.copyPaste;
+		if (!proxyRes.ok) {
+			let detail = `Erro ${proxyRes.status} ao gerar Pix.`;
+			try {
+				const errJson = (await proxyRes.json()) as { error?: { detail?: string; message?: string } };
+				detail = errJson?.error?.detail ?? errJson?.error?.message ?? detail;
+			} catch { /* sem JSON */ }
+			throw new Error(detail);
+		}
+
+		const data = (await proxyRes.json()) as {
+			data?: { pix?: { code?: string; qrcode_base64?: string }; total_amount?: number };
+		};
+
+		const pixCode = data?.data?.pix?.code ?? "";
+		if (!pixCode) throw new Error("BuckPay não retornou o código PIX (data.pix.code).");
+
 		document.querySelectorAll<HTMLInputElement>(".key-pix-input").forEach((inp) => {
-			inp.value = copy;
+			inp.value = pixCode;
 		});
 
+		const qrcodeBase64 = data?.data?.pix?.qrcode_base64 ?? "";
 		const qr = document.querySelector<HTMLImageElement>("img.qrcode");
-		if (qr && res.qrcodeDataUrl) {
-			qr.src = res.qrcodeDataUrl.startsWith("data:")
-				? res.qrcodeDataUrl
-				: `data:image/png;base64,${res.qrcodeDataUrl}`;
+		if (qr && qrcodeBase64) {
+			qr.src = `data:image/png;base64,${qrcodeBase64}`;
 		}
 
 		showLoader(false);
-		startCountdown(res.expiresInSeconds ?? 600, () => setExpired(true));
+		startCountdown(600, () => setExpired(true));
 	} catch (e) {
 		showLoader(false);
 		console.error(e);

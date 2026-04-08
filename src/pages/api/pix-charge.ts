@@ -1,6 +1,6 @@
 /**
  * Endpoint server-side: proxy para a API BuckPay.
- * O browser não pode setar User-Agent nem fazer fetch cross-origin direto.
+ * O browser não pode fazer fetch cross-origin direto (CORS).
  * Este endpoint roda no servidor e repassa a chamada com os headers corretos.
  *
  * POST /api/pix-charge/
@@ -13,11 +13,13 @@ const BUCKPAY_BASE = "https://api.realtechdev.com.br";
 const BUCKPAY_USER_AGENT = "Buckpay API";
 
 export const POST: APIRoute = async ({ request }) => {
-	const token = import.meta.env.PUBLIC_BUCKPAY_TOKEN?.trim() ?? "";
+	// Aceita token privado (BUCKPAY_TOKEN) ou público como fallback
+	const token =
+		(import.meta.env.BUCKPAY_TOKEN?.trim() || import.meta.env.PUBLIC_BUCKPAY_TOKEN?.trim()) ?? "";
 
 	if (!token) {
 		return new Response(
-			JSON.stringify({ error: "PUBLIC_BUCKPAY_TOKEN não configurado no .env" }),
+			JSON.stringify({ error: "BUCKPAY_TOKEN não configurado nas variáveis de ambiente" }),
 			{ status: 500, headers: { "Content-Type": "application/json" } },
 		);
 	}
@@ -32,16 +34,24 @@ export const POST: APIRoute = async ({ request }) => {
 		});
 	}
 
-	const upstream = await fetch(`${BUCKPAY_BASE}/v1/transactions`, {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-			Accept: "application/json",
-			Authorization: `Bearer ${token}`,
-			"User-Agent": BUCKPAY_USER_AGENT,
-		},
-		body: JSON.stringify(body),
-	});
+	let upstream: Response;
+	try {
+		upstream = await fetch(`${BUCKPAY_BASE}/v1/transactions`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Accept: "application/json",
+				Authorization: `Bearer ${token}`,
+				"User-Agent": BUCKPAY_USER_AGENT,
+			},
+			body: JSON.stringify(body),
+		});
+	} catch (err) {
+		return new Response(
+			JSON.stringify({ error: "Falha de rede ao conectar com a BuckPay", detail: String(err) }),
+			{ status: 502, headers: { "Content-Type": "application/json" } },
+		);
+	}
 
 	const text = await upstream.text();
 
@@ -50,3 +60,4 @@ export const POST: APIRoute = async ({ request }) => {
 		headers: { "Content-Type": "application/json" },
 	});
 };
+
