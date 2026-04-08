@@ -1,0 +1,503 @@
+---
+import Layout from "../../components/Layout.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import ProductCard from "../../components/ProductCard.astro";
+import products from "../../data/products.json";
+import type { Product } from "../../lib/price";
+import { discountPercent } from "../../lib/price";
+
+export function getStaticPaths() {
+	const list = products as Product[];
+	return list.map((product) => ({
+		params: { slug: product.slug },
+		props: { product },
+	}));
+}
+
+interface Props {
+	product: Product;
+}
+
+const { product } = Astro.props;
+const descriptionHtml = product.descriptionHtml?.trim() ?? "";
+if (import.meta.env.PROD && !descriptionHtml) {
+	throw new Error(
+		`Produto "${product.slug}" sem descriptionHtml. Execute: npm run enrich-products (ou npm run sync-data).`,
+	);
+}
+const pct = discountPercent(product.compareAt, product.price);
+const title = `${product.title} | Loja Oficial`;
+
+function thumbFromFull(url: string): string {
+	return url;
+}
+
+function resolveGallery(p: Product): string[] {
+	if (p.galleryImages?.length) return p.galleryImages;
+	const out: string[] = [];
+	const strip = (u: string) =>
+		u.replace(/-\d+x\d+(?=\.(jpg|jpeg|png|webp))/i, "");
+	out.push(strip(p.image));
+	if (p.imageHover) out.push(strip(p.imageHover));
+	return [...new Set(out)];
+}
+
+const gallery = resolveGallery(product);
+const qtyFieldId = `qty_${product.slug.replace(/[^a-zA-Z0-9]/g, "_")}`;
+const categoryLabel = product.categoryName ?? "Produtos";
+
+const bodyWoo = [
+	"single",
+	"single-product",
+	"woocommerce",
+	"woocommerce-page",
+].join(" ");
+
+const allProducts = products as Product[];
+const related = allProducts.filter((p) => p.slug !== product.slug).slice(0, 8);
+
+const productDivClass = [
+	"product",
+	"type-product",
+	"status-publish",
+	"first",
+	"instock",
+	"has-post-thumbnail",
+	"shipping-taxable",
+	"purchasable",
+	"product-type-simple",
+	pct !== null ? "sale" : "",
+]
+	.filter(Boolean)
+	.join(" ");
+
+const cardIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 84 84" class="svgo" style="max-width: 100%; max-height: 100%;"><path d="M73.5 13.1h-63C5 13.1.6 17.5.6 23v38c0 5.5 4.4 9.9 9.9 9.9h63c5.5 0 9.9-4.4 9.9-9.9V23c0-5.4-4.4-9.9-9.9-9.9zM77.4 61c0 2.2-1.8 3.9-3.9 3.9h-63c-2.2 0-3.9-1.8-3.9-3.9V36.3h70.9V61zm0-30.7H6.5V23c0-2.2 1.8-3.9 3.9-3.9h63c2.2 0 3.9 1.8 3.9 3.9v7.3z"></path><path d="M21.1 53.4h14.7c1.7 0 3-1.3 3-3s-1.3-3-3-3H21.1c-1.7 0-3 1.3-3 3s1.3 3 3 3z"></path></svg>`;
+---
+
+<Layout title={title} description={product.title} bodyClass={bodyWoo}>
+	<SiteHeader />
+	<main id="main" class="">
+		<div class="shop-container">
+			<div class="container">
+				<div class="woocommerce-notices-wrapper"></div>
+			</div>
+
+			<div id={`astro-product-${product.slug.replace(/[^a-zA-Z0-9-]/g, "-")}`} class={productDivClass}>
+				<div class="custom-product-page ux-layout-26 ux-layout-scope-global">
+					<section class="section astro-pdp-breadcrumb-section">
+						<div class="section-bg fill"></div>
+						<div class="section-content relative">
+							<div class="row row-collapse">
+								<div class="col small-12 large-12">
+									<div class="col-inner astro-pdp-breadcrumb-inner">
+										<div class="gap-element clearfix astro-pdp-gap-top"></div>
+										<div class="product-breadcrumb-container is-smaller">
+											<nav class="woocommerce-breadcrumb breadcrumbs uppercase">
+												<a href="/">Início</a>
+												{" "}
+												<span class="divider">&#47;</span>
+												{" "}
+												<a href="/#produtos">{categoryLabel}</a>
+											</nav>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+
+					<div class="row row-collapse astro-pdp-main-row">
+						<div class="col medium-6 small-12 large-6">
+							<div class="col-inner astro-pdp-gallery-col-inner">
+								<div class="row row-small">
+									<div class="col large-12">
+										<div
+											class="woocommerce-product-gallery woocommerce-product-gallery--with-images woocommerce-product-gallery--columns-4 images relative mb-half has-hover"
+											data-columns="4"
+										>
+											{
+												pct !== null && (
+													<div class="badge-container is-larger absolute left top z-1">
+														<div class="callout badge badge-square">
+															<div class="badge-inner secondary on-sale">
+																<span class="onsale">-{pct}%</span>
+															</div>
+														</div>
+													</div>
+												)
+											}
+											<div class="image-tools absolute top show-on-hover right z-3"></div>
+											<div
+												class="woocommerce-product-gallery__wrapper product-gallery-slider slider slider-nav-small mb-0 slider-type-fade"
+												data-astro-product-gallery
+											>
+												{
+													gallery.map((src, i) => (
+														<div
+															class:list={[
+																"woocommerce-product-gallery__image",
+																"slide",
+																i === 0 && "first",
+																i === 0 && "is-active",
+															]}
+															data-thumb={thumbFromFull(src)}
+															data-thumb-alt={product.title}
+															style={i === 0 ? "display: block;" : "display: none;"}
+														>
+															<a href={src}>
+																<img
+																	width="510"
+																	height="510"
+																	src={src}
+																	class:list={[
+																		"wp-post-image",
+																		i === 0 && "ux-skip-lazy",
+																	]}
+																	alt={
+																		i === 0
+																			? product.title
+																			: `${product.title} – Imagem ${i + 1}`
+																	}
+																	decoding="async"
+																	loading={i === 0 ? "eager" : "lazy"}
+																	data-large_image={src}
+																	data-large_image_width="1000"
+																	data-large_image_height="1000"
+																	style="width:100%; height:auto;"
+																/>
+															</a>
+														</div>
+													))
+												}
+											</div>
+											<div class="image-tools absolute bottom left z-3">
+												<a
+													href="#main"
+													class="zoom-button button is-outline circle icon tooltip hide-for-small"
+													title="Zoom"
+												>
+													<i class="icon-expand"></i>
+												</a>
+											</div>
+										</div>
+									</div>
+									{
+										gallery.length > 1 && (
+											<div class="col large-12 pt-half">
+												<div
+													class="product-thumbnails thumbnails slider-no-arrows slider row row-small row-slider slider-nav-small small-columns-4 large-columns-4"
+												>
+													{
+														gallery.map((src, i) => (
+															<div
+																class:list={["col", i === 0 && "is-nav-selected", i === 0 && "first"]}
+															>
+																<a href="#" class="astro-gallery-thumb-link">
+																	<img
+																		loading="lazy"
+																		src={thumbFromFull(src)}
+																		alt=""
+																		width="100"
+																		height="100"
+																		class="attachment-woocommerce_thumbnail"
+																		style="width: 100%; height: auto; border-radius: 5px;"
+																	/>
+																</a>
+															</div>
+														))
+													}
+												</div>
+											</div>
+										)
+									}
+								</div>
+							</div>
+						</div>
+
+						<div class="col medium-6 small-12 large-6">
+							<div class="col-inner text-left astro-pdp-summary-col-inner">
+								<div class="product-tags-img text-left" style="margin-bottom: 8px;">
+									<img
+										loading="lazy"
+										style="max-width: 250px; height: auto; display: block;"
+										src="/images/wp-content/uploads/2024/05/Captura-de-tela-2025-01-23-200956.png"
+										alt="2102 Vendidos"
+										decoding="async"
+									/>
+								</div>
+
+								<div class="product-title-container">
+									<h1 class="product-title product_title entry-title">{product.title}</h1>
+									<div class="is-divider small"></div>
+								</div>
+
+								<div class="product-price-container is-normal">
+									<div class="price-wrapper">
+										<p
+											class:list={[
+												"price",
+												"product-page-price",
+												pct !== null && "price-on-sale",
+											]}
+										>
+											<span
+												class="wcsp-container wcsp-container-simple wcsp-container-product wcsp-containe-unique-price"
+											>
+												<span class="payment payment-card has-icons">
+													<i class="icon" set:html={cardIconSvg} />
+													<span class="payment-info">
+														<span class="payment-price">
+															{
+																pct !== null ? (
+																	<>
+																		<del>
+																			<span class="woocommerce-Price-amount amount">
+																				<bdi>
+																					<span class="woocommerce-Price-currencySymbol"
+																						>&#82;&#36;</span
+																					>&nbsp;{product.wasRaw}
+																				</bdi>
+																			</span>
+																		</del>
+																		<ins>
+																			<span class="woocommerce-Price-amount amount">
+																				<bdi>
+																					<span class="woocommerce-Price-currencySymbol"
+																						>&#82;&#36;</span
+																					>&nbsp;{product.nowRaw}
+																				</bdi>
+																			</span>
+																		</ins>
+																	</>
+																) : (
+																	<span class="woocommerce-Price-amount amount">
+																		<bdi>
+																			<span class="woocommerce-Price-currencySymbol"
+																				>&#82;&#36;</span
+																			>&nbsp;{product.nowRaw}
+																		</bdi>
+																	</span>
+																)
+															}
+														</span>
+														<span class="payment-name best_no_fee">
+															<span class="text">
+																Em até <span class="number">{product.instN}</span>x de{" "}
+																<span class="woocommerce-Price-amount amount">
+																	<bdi>
+																		<span class="woocommerce-Price-currencySymbol"
+																			>&#82;&#36;</span
+																		>&nbsp;{product.instValRaw}
+																	</bdi>
+																</span>
+															</span>
+														</span>
+													</span>
+												</span>
+											</span>
+										</p>
+									</div>
+								</div>
+
+								<div class="row" id="row-astro-pix">
+									<div class="col medium-6 small-10 large-6" id="astro-pix-col">
+										<div class="col-inner">
+											<div class="pix">
+												<img
+													loading="lazy"
+													class="img_pix"
+													alt="Pix"
+													width="25"
+													height="25"
+													src="/images/wp-content/uploads/2024/05/logo-pix-50.png"
+												/>
+												<b>5% OFF</b> no pix{" "}
+												<span class="pix2">
+													{" "}
+													<b>+ envio prioritário</b>
+												</span>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="add-to-cart-container form-normal is-normal">
+									<form class="cart" method="post" action={Astro.url.pathname}>
+										<div class="ux-quantity quantity buttons_added">
+											<input
+												type="button"
+												value="-"
+												class="ux-quantity__button ux-quantity__button--minus button minus is-form"
+											/>
+											<label class="screen-reader-text" for={qtyFieldId}>
+												{product.title} quantidade
+											</label>
+											<input
+												type="number"
+												id={qtyFieldId}
+												class="input-text qty text"
+												name="quantity"
+												value="1"
+												min="1"
+												step="1"
+												aria-label="Quantidade de produto"
+												inputmode="numeric"
+												autocomplete="off"
+											/>
+											<input
+												type="button"
+												value="+"
+												class="ux-quantity__button ux-quantity__button--plus button plus is-form"
+											/>
+										</div>
+										<button
+											type="button"
+											class="single_add_to_cart_button button alt js-add-to-cart"
+											data-slug={product.slug}
+											data-title={product.title}
+											data-image={product.image}
+											data-unit-price={product.unitPrice}
+										>
+											Adicionar ao carrinho
+										</button>
+									</form>
+								</div>
+
+								<div class="row formas_pag_prod" id="row-astro-formas-pag">
+									<div class="col small-12 large-12">
+										<div class="col-inner text-center">
+											<div id="text-astro-formas-pagamento-prod" class="text formas_pagamento_prod">
+												<p><strong>Formas de Pagamento</strong></p>
+											</div>
+											<div class="footer__payment">
+												<div class="payment-list">
+													<img
+														alt="Pix"
+														width="39"
+														height="25"
+														src="https://icons.yampi.me/svg/pix.svg"
+													/>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="icon-box featured-box icon-box-left text-left">
+									<div class="icon-box-img" style="width: 35px">
+										<div class="icon">
+											<div class="icon-inner">
+												<img
+													loading="lazy"
+													width="37"
+													height="30"
+													src="/images/wp-content/uploads/2024/05/Captura-de-tela-2024-05-03-173829.png"
+													class="attachment-medium size-medium"
+													alt=""
+													decoding="async"
+												/>
+											</div>
+										</div>
+									</div>
+									<div class="icon-box-text last-reset">
+										<div id="text-astro-frete-prod" class="text">
+											<h3><b>Frete Grátis</b></h3>
+											<p>
+												Frete grátis em pedidos acima de R$79<br />
+												Entrega realizado pelos Correios Brasileiro©.
+											</p>
+										</div>
+									</div>
+								</div>
+
+								<div class="gap-element clearfix astro-pdp-gap-mid"></div>
+
+								<div class="icon-box featured-box icon-box-left text-left">
+									<div class="icon-box-img" style="width: 35px">
+										<div class="icon">
+											<div class="icon-inner">
+												<img
+													loading="lazy"
+													width="42"
+													height="45"
+													src="/images/wp-content/uploads/2024/05/Captura-de-tela-2024-05-03-173836.png"
+													class="attachment-medium size-medium"
+													alt=""
+													decoding="async"
+												/>
+											</div>
+										</div>
+									</div>
+									<div class="icon-box-text last-reset">
+										<div id="text-astro-devolucoes-prod" class="text">
+											<h3><b>Devoluções Gratuitas</b></h3>
+											<p>
+												Sua compra está protegida, cancele gratuitamente se você se arrepender.<br
+												/>
+												7 dias após o recebimento da mercadoria.
+											</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="row" id="row-astro-descricao">
+						<div class="col small-12 large-12">
+							<div class="col-inner">
+								<div class="product-page-sections">
+									<div class="product-section">
+										<div class="row">
+											<div class="large-2 col pb-0 mb-0">
+												<h5 class="uppercase mt">Descrição</h5>
+											</div>
+											<div class="large-10 col pb-0 mb-0">
+												<div class="panel entry-content">
+													{
+														descriptionHtml ? (
+															<div set:html={descriptionHtml} />
+														) : import.meta.env.DEV ? (
+															<p class="woocommerce-info">
+																<strong>{product.title}</strong> — rode{" "}
+																<code>npm run enrich-products</code> para importar a descrição do site
+																de referência.
+															</p>
+														) : null
+													}
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					{
+						related.length > 0 && (
+							<div class="row" id="row-astro-related">
+								<div class="col small-12 large-12">
+									<div class="col-inner">
+										<div class="row large-columns-4 medium-columns-3 small-columns-2 row-small">
+											{related.map((p) => (
+												<ProductCard product={p} />
+											))}
+										</div>
+									</div>
+								</div>
+							</div>
+						)
+					}
+				</div>
+			</div>
+		</div>
+	</main>
+	<SiteFooter />
+	<script>
+		import { initProductPage } from "../../scripts/product-page";
+		const main = document.getElementById("main");
+		if (main) initProductPage(main);
+	</script>
+</Layout>

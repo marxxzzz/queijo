@@ -1,0 +1,110 @@
+---
+import Layout from "../../components/Layout.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+---
+
+<Layout title="Carrinho | Loja Oficial" description="Seu carrinho de compras.">
+	<SiteHeader />
+	<main id="main" class="woocommerce-cart">
+		<div id="content" role="main" class="content-area page-wrapper">
+			<div class="cart-page-wrapper container">
+
+				<!-- Checkout Steps Breadcrumb -->
+				<nav class="cart-steps" aria-label="Etapas do checkout">
+					<span class="cart-step cart-step--active">
+						<span class="cart-step__num">1</span>
+						Carrinho de Compras
+					</span>
+					<span class="cart-step__sep">›</span>
+					<span class="cart-step cart-step--inactive">
+						<span class="cart-step__num">2</span>
+						Detalhes da Compra
+					</span>
+					<span class="cart-step__sep">›</span>
+					<span class="cart-step cart-step--inactive">
+						<span class="cart-step__num">3</span>
+						Pedido Completo
+					</span>
+				</nav>
+
+				<div class="woocommerce">
+					<!-- Empty cart state -->
+					<div id="cart-page-empty" class="cart-empty woocommerce-info">
+						<p>Nenhum produto no carrinho.</p>
+						<a href="/#produtos" class="button primary wc-backward">Retornar para a loja</a>
+					</div>
+
+					<!-- Cart layout: table + sidebar -->
+					<div class="cart-page-layout" hidden id="cart-page-layout">
+
+						<!-- LEFT: Cart Table -->
+						<div class="cart-page-left">
+							<form class="woocommerce-cart-form" action="#" method="post">
+								<table class="shop_table shop_table_responsive cart woocommerce-cart-form__contents">
+									<thead>
+										<tr>
+											<th class="product-remove">&nbsp;</th>
+											<th class="product-thumbnail">&nbsp;</th>
+											<th class="product-name">PRODUTO</th>
+											<th class="product-price">PREÇO</th>
+											<th class="product-quantity">QUANTIDADE</th>
+											<th class="product-subtotal">SUBTOTAL</th>
+										</tr>
+									</thead>
+									<tbody id="astro-cart-page-tbody"></tbody>
+								</table>
+							</form>
+
+							<!-- Bottom action buttons -->
+							<div class="cart-page-actions">
+								<a href="/#produtos" class="button outline cart-page-btn-continue">← CONTINUAR COMPRANDO</a>
+							</div>
+						</div>
+
+						<!-- RIGHT: Totals Sidebar -->
+						<div class="cart-page-right">
+							<div class="cart_totals">
+								<h2 class="cart-totals-title">TOTAL NO CARRINHO</h2>
+								<table class="shop_table cart-totals-table">
+									<tr class="cart-subtotal">
+										<th>Subtotal</th>
+										<td id="cart-page-subtotal">R$ 0,00</td>
+									</tr>
+									<tr class="order-total">
+										<th>Total</th>
+										<td>
+											<div class="order-total-inner">
+												<span class="order-total-icon">🖥</span>
+												<strong id="cart-page-total" class="order-total-amount">R$ 0,00</strong>
+											</div>
+											<div id="cart-page-installments" class="order-total-installments">Em até 10x de R$ 0,00</div>
+										</td>
+									</tr>
+								</table>
+
+								<a href="/finalizar-compra/" class="checkout-button button primary expand uppercase">
+									CONTINUAR PARA FINALIZAÇÃO
+								</a>
+
+								<!-- Coupon -->
+								<div class="coupon-section">
+									<p class="coupon-label">🏷 Cupom</p>
+									<input
+										type="text"
+										id="coupon_code"
+										class="input-text coupon-input"
+										placeholder="Código do cupom"
+									/>
+									<button type="button" id="apply-coupon" class="button coupon-btn">Aplicar cupom</button>
+								</div>
+							</div>
+						</div>
+
+					</div><!-- .cart-page-layout -->
+				</div><!-- .woocommerce -->
+			</div><!-- .cart-page-wrapper -->
+		</div>
+	</main>
+	<SiteFooter />
+</Layout>

@@ -1,0 +1,16 @@
+<svg width="33" height="32" viewBox="0 0 33 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Truck" clip-path="url(#clip0_222_120)">
+<path id="Vector" d="M22.5 10H27.8225C28.0218 9.99991 28.2165 10.0594 28.3818 10.1707C28.5471 10.2821 28.6753 10.4403 28.75 10.625L30.5 15" stroke="#222222" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_2" d="M2.5 18H22.5" stroke="#222222" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_3" d="M23.5 27C25.1569 27 26.5 25.6569 26.5 24C26.5 22.3431 25.1569 21 23.5 21C21.8431 21 20.5 22.3431 20.5 24C20.5 25.6569 21.8431 27 23.5 27Z" stroke="#222222" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_4" d="M9.5 27C11.1569 27 12.5 25.6569 12.5 24C12.5 22.3431 11.1569 21 9.5 21C7.84315 21 6.5 22.3431 6.5 24C6.5 25.6569 7.84315 27 9.5 27Z" stroke="#222222" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_5" d="M20.5 24H12.5" stroke="#222222" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_6" d="M22.5 15H30.5V23C30.5 23.2652 30.3946 23.5196 30.2071 23.7071C30.0196 23.8946 29.7652 24 29.5 24H26.5" stroke="#222222" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_7" d="M6.5 24H3.5C3.23478 24 2.98043 23.8946 2.79289 23.7071C2.60536 23.5196 2.5 23.2652 2.5 23V9C2.5 8.73478 2.60536 8.48043 2.79289 8.29289C2.98043 8.10536 3.23478 8 3.5 8H22.5V21.1712" stroke="#222222" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<clipPath id="clip0_222_120">
+<rect width="32" height="32" fill="white" transform="translate(0.5)"/>
+</clipPath>
+</defs>
+</svg>

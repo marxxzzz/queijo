@@ -1,0 +1,60 @@
+---
+import "../styles/reference/extracted.css";
+import "../styles/flatsome-astro.css";
+import FlatsomeHead from "./FlatsomeHead.astro";
+import CartPopup from "./CartPopup.astro";
+
+interface Props {
+	title?: string;
+	description?: string;
+	bodyClass?: string;
+}
+
+const {
+	title = "Loja Oficial",
+	description = "Queijos artesanais, cestas e kits selecionados com entrega no Brasil.",
+	bodyClass = "",
+} = Astro.props;
+
+const bodyClasses = [
+	"woocommerce-js",
+	"theme-flatsome",
+	"lightbox",
+	"full-width",
+	"nav-dropdown-has-arrow",
+	"nav-dropdown-has-shadow",
+	"nav-dropdown-has-border",
+	bodyClass,
+]
+	.filter(Boolean)
+	.join(" ");
+---
+
+<!doctype html>
+<html lang="pt-BR">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="description" content={description} />
+		<link rel="icon" type="image/png" href="/favicon.png" />
+		<title>{title}</title>
+		<FlatsomeHead />
+	</head>
+	<body class={bodyClasses}>
+		<div id="wrapper">
+			<span id="top" aria-hidden="true" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0"></span>
+			<slot />
+		</div>
+		<div class="ux-body-overlay" aria-hidden="true"></div>
+		<CartPopup />
+		<div id="cart-toast" class="cart-toast" role="status" aria-live="polite">
+			Produto adicionado ao carrinho
+		</div>
+		<script>
+			import { initCartUi } from "../scripts/cart-ui";
+			import { initFlatsomeBridge } from "../scripts/flatsome-bridge";
+			initFlatsomeBridge();
+			initCartUi();
+		</script>
+	</body>
+</html>

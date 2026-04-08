@@ -1,0 +1,234 @@
+import { hasPixApiConfigured, requestPixCharge } from "./pix-api";
+
+const CART_KEY = "loja-oficial-cart-v1";
+const CHECKOUT_KEY = "loja-checkout-payload";
+
+type CartLine = {
+	slug: string;
+	title: string;
+	image: string;
+	unitPrice: number;
+	quantity: number;
+};
+
+function fmtBRL(n: number): string {
+	return new Intl.NumberFormat("pt-BR", {
+		style: "currency",
+		currency: "BRL",
+	}).format(n);
+}
+
+function readCart(): CartLine[] {
+	try {
+		const raw = localStorage.getItem(CART_KEY);
+		if (!raw) return [];
+		const p = JSON.parse(raw) as unknown;
+		return Array.isArray(p) ? (p as CartLine[]) : [];
+	} catch {
+		return [];
+	}
+}
+
+function cartTotal(lines: CartLine[]): number {
+	return lines.reduce((s, l) => s + l.unitPrice * l.quantity, 0);
+}
+
+function showLoader(show: boolean) {
+	const el = document.querySelector<HTMLElement>(".ajax-loader");
+	if (el) el.style.visibility = show ? "visible" : "hidden";
+}
+
+function setTotalLabels(amount: number) {
+	const txt = fmtBRL(amount);
+	document.querySelectorAll(".cart-total-value").forEach((n) => {
+		n.textContent = txt;
+	});
+}
+
+function renderProductThumbs(lines: CartLine[]) {
+	const items = lines
+		.map(
+			(l) =>
+				`<div class="item"><img src="${escapeAttr(l.image)}" alt="${escapeAttr(l.title)}" title="${escapeAttr(l.title)}"></div>`,
+		)
+		.join("");
+	const inner = `<div class="asScrollable-container" style="height:87px"><div class="product-wrapper asScrollable-content" style="height:70px;justify-content:flex-start">${items}</div></div>`;
+	document.querySelectorAll(".product-content").forEach((pc) => {
+		pc.innerHTML = inner;
+	});
+}
+
+function escapeAttr(s: string): string {
+	return s
+		.replace(/&/g, "&amp;")
+		.replace(/"/g, "&quot;")
+		.replace(/</g, "&lt;");
+}
+
+let timerId = 0;
+function startCountdown(seconds: number, onEnd: () => void) {
+	window.clearInterval(timerId);
+	const spans = document.querySelectorAll(".pix-countdown-remaining");
+	const tick = () => {
+		seconds = Math.max(0, seconds - 1);
+		const m = Math.floor(seconds / 60);
+		const sec = seconds % 60;
+		const label = `${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+		spans.forEach((s) => (s.textContent = label));
+		if (seconds <= 0) {
+			window.clearInterval(timerId);
+			onEnd();
+		}
+	};
+	tick();
+	timerId = window.setInterval(tick, 1000);
+}
+
+function setExpired(expired: boolean) {
+	document.querySelectorAll(".content-pix").forEach((el) => {
+		el.classList.toggle("is-pix-expired", expired);
+	});
+}
+
+function wireCopy() {
+	document.querySelectorAll(".copy_digitable_line").forEach((btn) => {
+		btn.addEventListener("click", async () => {
+			if ((btn as HTMLButtonElement).type !== "button" && (btn as HTMLElement).tagName !== "BUTTON")
+				return;
+			const root = (btn as HTMLElement).closest(".content-pix");
+			const input = root?.querySelector<HTMLInputElement>(".key-pix-input");
+			if (!input?.value) return;
+			try {
+				await navigator.clipboard.writeText(input.value);
+			} catch {
+				input.select();
+				document.execCommand("copy");
+			}
+			const span = (btn as HTMLElement).querySelector("span");
+			const t = span || btn;
+			const prev = t.textContent;
+			if (span) span.textContent = " COPIADO!";
+			window.setTimeout(() => {
+				if (span) span.textContent = prev;
+			}, 2000);
+		});
+	});
+}
+
+function wireCollapse() {
+	document.querySelectorAll(".collapse-button").forEach((btn) => {
+		btn.addEventListener("click", () => {
+			const wrap = btn.closest(".info-wrapper, .details-wrapper");
+			const card = wrap?.querySelector<HTMLElement>("[id^='info-card'], [id^='details-card']");
+			if (!card) return;
+			const web = card.id.endsWith("-web");
+			if (web) {
+				card.classList.toggle("d-none-fade-web");
+			} else {
+				card.classList.toggle("d-none-fade");
+			}
+		});
+	});
+}
+
+async function loadPixCharge() {
+	const lines = readCart();
+	if (!lines.length) {
+		window.location.href = "/carrinho/";
+		return;
+	}
+
+	let shippingBRL = 0;
+	try {
+		const raw = sessionStorage.getItem(CHECKOUT_KEY);
+		if (raw) {
+			const pay = JSON.parse(raw) as { shippingBRL?: number };
+			if (typeof pay.shippingBRL === "number") shippingBRL = pay.shippingBRL;
+		}
+	} catch {
+		/* ignore */
+	}
+
+	const amount = cartTotal(lines) + shippingBRL;
+	setTotalLabels(amount);
+	renderProductThumbs(lines);
+
+	if (!hasPixApiConfigured()) {
+		showLoader(false);
+		document.querySelectorAll(".pix-api-missing").forEach((e) => {
+			(e as HTMLElement).style.display = "block";
+		});
+		return;
+	}
+
+	document.querySelectorAll(".pix-api-missing").forEach((e) => {
+		(e as HTMLElement).style.display = "none";
+	});
+
+	window.clearInterval(timerId);
+	showLoader(true);
+	setExpired(false);
+
+	try {
+		let checkout: Record<string, unknown> = {};
+		try {
+			const cr = sessionStorage.getItem(CHECKOUT_KEY);
+			if (cr) checkout = JSON.parse(cr) as Record<string, unknown>;
+		} catch {
+			/* */
+		}
+		const customer = (checkout.customer as Record<string, string>) || {};
+		const shipping = (checkout.shipping as Record<string, string>) || {};
+
+		const res = await requestPixCharge({
+			amount,
+			items: lines.map((l) => ({
+				slug: l.slug,
+				title: l.title,
+				quantity: l.quantity,
+				unitPrice: l.unitPrice,
+			})),
+			customer,
+			shipping,
+			reference: `loja-${Date.now()}`,
+		});
+
+		const copy = res.copyPaste;
+		document.querySelectorAll<HTMLInputElement>(".key-pix-input").forEach((inp) => {
+			inp.value = copy;
+		});
+
+		const qr = document.querySelector<HTMLImageElement>("img.qrcode");
+		if (qr && res.qrcodeDataUrl) {
+			qr.src = res.qrcodeDataUrl.startsWith("data:")
+				? res.qrcodeDataUrl
+				: `data:image/png;base64,${res.qrcodeDataUrl}`;
+		}
+
+		showLoader(false);
+		startCountdown(res.expiresInSeconds ?? 600, () => setExpired(true));
+	} catch (e) {
+		showLoader(false);
+		console.error(e);
+		const err = document.querySelector<HTMLElement>(".pix-error-msg");
+		if (err) {
+			err.textContent =
+				e instanceof Error ? e.message : "Não foi possível gerar o Pix. Tente novamente.";
+			err.style.display = "block";
+		}
+	}
+}
+
+export function initPixCheckoutPage() {
+	wireCopy();
+	wireCollapse();
+
+	document.querySelectorAll(".js-regenerate-pix").forEach((btn) => {
+		btn.addEventListener("click", () => {
+			setExpired(false);
+			void loadPixCharge();
+		});
+	});
+
+	void loadPixCharge();
+}

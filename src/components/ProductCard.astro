@@ -1,0 +1,129 @@
+---
+import type { Product } from "../lib/price";
+import { discountPercent } from "../lib/price";
+
+interface Props {
+	product: Product;
+	priority?: boolean;
+}
+
+const { product, priority = false } = Astro.props;
+const pct = discountPercent(product.compareAt, product.price);
+const href = `/produto/${product.slug}/`;
+const hover = product.imageHover;
+---
+
+<div class="col">
+	<div class="col-inner">
+		<div class="product-small box has-hover box-normal box-text-bottom">
+			<div class="box-image relative">
+				{
+					pct !== null && (
+						<div class="badge-container absolute left top z-1">
+							<div class="callout badge badge-square">
+								<div class="badge-inner secondary on-sale">
+									<span class="onsale">-{pct}%</span>
+								</div>
+							</div>
+						</div>
+					)
+				}
+				<div class="">
+					<a href={href} aria-label={product.title}>
+						{
+							hover && (
+								<img
+									loading={priority ? "eager" : "lazy"}
+									decoding="async"
+									width="247"
+									height="296"
+									src={hover}
+									class="show-on-hover absolute fill hide-for-small back-image"
+									alt=""
+								/>
+							)
+						}
+						<img
+							loading={priority ? "eager" : "lazy"}
+							decoding="async"
+							width="247"
+							height="296"
+							src={product.image}
+							class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail"
+							alt={product.title}
+						/>
+					</a>
+				</div>
+				<div class="image-tools top right show-on-hover"></div>
+				<div class="image-tools grid-tools text-center hide-for-small bottom hover-slide-in show-on-hover">
+					<a class="quick-view" href={href}>Visualização Rápida</a>
+				</div>
+			</div>
+
+			<div class="box-text text-center is-xsmall">
+				<div class="title-wrapper">
+					<p class="name product-title woocommerce-loop-product__title">
+						<a href={href} class="woocommerce-LoopProduct-link woocommerce-loop-product__link">
+							{product.title}
+						</a>
+					</p>
+				</div>
+				<div class="price-wrapper">
+					<span class="price">
+						<span class="wcsp-container wcsp-container-simple wcsp-container-loop wcsp-containe-unique-price">
+							<span class="payment payment-card">
+								<span class="payment-info">
+									<span class="payment-price">
+										<del>
+											<span class="woocommerce-Price-amount amount">
+												<bdi>
+													<span class="woocommerce-Price-currencySymbol">&#82;&#36;</span>&nbsp;{
+														product.wasRaw
+													}
+												</bdi>
+											</span>
+										</del>
+										<ins>
+											<span class="woocommerce-Price-amount amount">
+												<bdi>
+													<span class="woocommerce-Price-currencySymbol">&#82;&#36;</span>&nbsp;{
+														product.nowRaw
+													}
+												</bdi>
+											</span>
+										</ins>
+									</span>
+									<span class="payment-name best_no_fee">
+										<span class="text">
+											<span class="number">{product.instN}</span>x de <span
+												class="woocommerce-Price-amount amount"
+												><bdi
+													><span class="woocommerce-Price-currencySymbol">&#82;&#36;</span>&nbsp;{
+														product.instValRaw
+													}</bdi
+												></span
+											>
+										</span>
+									</span>
+								</span>
+							</span>
+						</span>
+					</span>
+				</div>
+				<div class="add-to-cart-button">
+					<button
+						type="button"
+						class="primary is-small mb-0 button product_type_simple add_to_cart_button is-flat js-add-to-cart"
+						data-slug={product.slug}
+						data-title={product.title}
+						data-image={product.image}
+						data-unit-price={product.unitPrice}
+						aria-label={`Adicionar ao carrinho: ${product.title}`}
+					>
+						Adicionar ao carrinho
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

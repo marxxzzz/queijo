@@ -1,17 +1,445 @@
 ---
+import Layout from "../components/Layout.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import ProductCard from "../components/ProductCard.astro";
+import products from "../data/products.json";
+import type { Product } from "../lib/price";
 
+const list = products as Product[];
+const splitIdx = list.findIndex((p) => p.slug.startsWith("4-queijos-de-alagoa"));
+const featured =
+	splitIdx >= 0 ? list.slice(0, splitIdx) : list.slice(0, Math.ceil(list.length / 2));
+const complement =
+	splitIdx >= 0 ? list.slice(splitIdx) : list.slice(featured.length);
+
+const heroSrc =
+	"/images/wp-content/uploads/2026/01/2-slide-1766153988818-2516402732-49d6edf31ce051e28d132e30268171911766154001-1920-1920.webp";
+const heroSrcSet = `${heroSrc} 1200w, /images/wp-content/uploads/2026/01/2-slide-1766153988818-2516402732-49d6edf31ce051e28d132e30268171911766154001-1920-1920-768x768.webp 768w, /images/wp-content/uploads/2026/01/2-slide-1766153988818-2516402732-49d6edf31ce051e28d132e30268171911766154001-1920-1920-510x510.webp 510w`;
+
+const bannerJoin =
+	"/images/wp-content/uploads/2025/11/1717783961_come_and_join.jpg";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout
+	title="Loja Oficial"
+	description="Loja de queijos artesanais, kits e cestas — Ofertas imperdíveis."
+	bodyClass="home"
+>
+	<SiteHeader />
+
+	<main id="main" class="">
+		<div id="content" role="main" class="content-area">
+			<div id="gap-1595097585" class="gap-element clearfix hidden" style="display:block; height:auto;">
+				<style is:global>
+					#gap-1595097585 {
+						padding-top: 30px;
+					}
+				</style>
+			</div>
+
+			<section class="section" id="section_546320785">
+				<div class="section-bg fill"></div>
+				<div class="section-content relative">
+					<div class="row show-for-small" id="row-380588080">
+						<div id="col-360811531" class="col medium-4 small-12 large-4">
+							<div class="col-inner">
+								<div class="img has-hover x md-x lg-x y md-y lg-y" id="image_68564829">
+									<div class="img-inner dark">
+										<picture>
+											<source type="image/webp" srcset={heroSrcSet} sizes="100vw" />
+											<img
+												decoding="async"
+												width="1200"
+												height="1200"
+												src={heroSrc}
+												class="attachment-original size-original"
+												alt=""
+												fetchpriority="high"
+											/>
+										</picture>
+									</div>
+									<style is:global>
+										#image_68564829 {
+											width: 100%;
+										}
+									</style>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row hide-for-small" id="row-hero-desktop">
+						<div class="col small-12 large-12">
+							<div class="col-inner">
+								<div class="img has-hover" id="image_hero_desktop">
+									<div class="img-inner dark">
+										<picture>
+											<source type="image/webp" srcset={heroSrcSet} sizes="100vw" />
+											<img
+												decoding="async"
+												width="1200"
+												height="1200"
+												src={heroSrc}
+												class="attachment-original size-original"
+												alt=""
+												fetchpriority="high"
+											/>
+										</picture>
+									</div>
+									<style is:global>
+										#image_hero_desktop {
+											width: 100%;
+										}
+									</style>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<style is:global>
+					#section_546320785 {
+						padding-top: 0;
+						padding-bottom: 0;
+					}
+				</style>
+			</section>
+
+			<div class="row row-collapse align-center" id="row-898818082">
+				<div id="col-47858755" class="col small-12 large-12">
+					<div class="col-inner">
+						<div id="text-2590770451" class="text">
+							<p>Os mais pedidos!</p>
+							<style is:global>
+								#text-2590770451 {
+									font-size: 1.5rem;
+									line-height: 0.75;
+									text-align: center;
+								}
+								@media (min-width: 550px) {
+									#text-2590770451 {
+										font-size: 1.5rem;
+									}
+								}
+								@media (min-width: 850px) {
+									#text-2590770451 {
+										font-size: 1.7rem;
+									}
+								}
+							</style>
+						</div>
+						<div
+							class="row equalize-box large-columns-5 medium-columns-5 small-columns-2 row-small"
+							id="produtos"
+						>
+							{featured.map((product, i) => (
+								<ProductCard product={product} priority={i < 4} />
+							))}
+						</div>
+						<style is:global>
+							#col-47858755 > .col-inner {
+								padding: 0 15px;
+							}
+						</style>
+					</div>
+				</div>
+			</div>
+
+			<section class="section" id="section_798236122">
+				<div class="section-bg fill"></div>
+				<div class="section-content relative">
+					<div class="row align-center" id="row-904815068">
+						<div id="col-1224879180" class="col small-12 large-12">
+							<div class="col-inner text-center">
+								<a href="/#produtos-complementos" class="button primary">
+									<span>VER COLEÇÃO COMPLETA</span>
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<style is:global>
+					#section_798236122 {
+						padding-top: 30px;
+						padding-bottom: 30px;
+					}
+				</style>
+			</section>
+
+			<section class="section" id="section_1929135617">
+				<div class="section-bg fill"></div>
+				<div class="section-content relative">
+					<div class="row show-for-small" id="row-32001522">
+						<div id="col-1103249323" class="col medium-4 small-12 large-4">
+							<div class="col-inner">
+								<div class="img has-hover x md-x lg-x y md-y lg-y" id="image_630412195">
+									<div class="img-inner dark">
+										<img
+											loading="lazy"
+											decoding="async"
+											width="1920"
+											height="500"
+											src={bannerJoin}
+											class="attachment-original size-original"
+											alt=""
+											sizes="(max-width: 1920px) 100vw, 1920px"
+										/>
+									</div>
+									<style is:global>
+										#image_630412195 {
+											width: 100%;
+										}
+									</style>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row hide-for-small">
+						<div class="col small-12 large-12">
+							<div class="col-inner">
+								<div class="img has-hover" id="image_banner_desktop">
+									<div class="img-inner dark">
+										<img
+											loading="lazy"
+											decoding="async"
+											width="1920"
+											height="500"
+											src={bannerJoin}
+											class="attachment-original size-original"
+											alt=""
+											sizes="100vw"
+										/>
+									</div>
+									<style is:global>
+										#image_banner_desktop {
+											width: 100%;
+										}
+									</style>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<style is:global>
+					#section_1929135617 {
+						padding-top: 0;
+						padding-bottom: 0;
+					}
+				</style>
+			</section>
+
+			<div class="row row-collapse align-center" id="row-1762011744">
+				<div id="col-892224050" class="col small-12 large-12">
+					<div class="col-inner">
+						<div id="text-2615399574" class="text">
+							<p>Complementos</p>
+							<style is:global>
+								#text-2615399574 {
+									font-size: 1.5rem;
+									line-height: 0.75;
+									text-align: center;
+								}
+								@media (min-width: 550px) {
+									#text-2615399574 {
+										font-size: 1.5rem;
+									}
+								}
+								@media (min-width: 850px) {
+									#text-2615399574 {
+										font-size: 1.7rem;
+									}
+								}
+							</style>
+						</div>
+						<div
+							class="row equalize-box large-columns-5 medium-columns-5 small-columns-2 row-small"
+							id="produtos-complementos"
+						>
+							{complement.map((product, i) => (
+								<ProductCard product={product} priority={false} />
+							))}
+						</div>
+						<style is:global>
+							#col-892224050 > .col-inner {
+								padding: 0 15px;
+							}
+						</style>
+					</div>
+				</div>
+			</div>
+
+			<section class="section" id="section_103534830">
+				<div class="section-bg fill"></div>
+				<div class="section-content relative">
+					<div class="row align-center" id="row-870556827">
+						<div id="col-1932624965" class="col small-12 large-12">
+							<div class="col-inner text-center">
+								<a href="/#produtos-complementos" class="button primary">
+									<span>VER COLEÇÃO COMPLETA</span>
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<style is:global>
+					#section_103534830 {
+						padding-top: 30px;
+						padding-bottom: 30px;
+					}
+				</style>
+			</section>
+
+			<section class="section" id="section_1858715450">
+				<div class="section-bg fill"></div>
+				<div class="section-content relative">
+					<div id="gap-651572716" class="gap-element clearfix" style="display:block; height:auto;">
+						<style is:global>
+							#gap-651572716 {
+								padding-top: 10px;
+							}
+						</style>
+					</div>
+					<div class="row row-collapse" id="row-445813656">
+						<div id="col-1446787330" class="col medium-3 small-6 large-3">
+							<div class="col-inner">
+								<div class="icon-box featured-box icon-box-center text-center">
+									<div class="icon-box-img" style="width: 25px">
+										<div class="icon">
+											<div class="icon-inner">
+												<img
+													loading="lazy"
+													decoding="async"
+													width="33"
+													height="32"
+													src="/images/wp-content/uploads/2024/05/icon-frete.svg"
+													class="attachment-medium size-medium"
+													alt=""
+												/>
+											</div>
+										</div>
+									</div>
+									<div class="icon-box-text last-reset">
+										<div id="text-1703419339" class="text">
+											<h3>FRETE EXPRESSO</h3>
+											<style is:global>
+												#text-1703419339 {
+													font-size: 0.85rem;
+													line-height: 3;
+												}
+											</style>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="col-1677921239" class="col medium-3 small-6 large-3">
+							<div class="col-inner">
+								<div class="icon-box featured-box icon-box-center text-center">
+									<div class="icon-box-img" style="width: 25px">
+										<div class="icon">
+											<div class="icon-inner">
+												<img
+													loading="lazy"
+													decoding="async"
+													width="33"
+													height="32"
+													src="/images/wp-content/uploads/2024/05/icon-parcelamento.svg"
+													class="attachment-medium size-medium"
+													alt=""
+												/>
+											</div>
+										</div>
+									</div>
+									<div class="icon-box-text last-reset">
+										<div id="text-488786638" class="text">
+											<h3>PARCELAMENTO<br />EM ATÉ 12X</h3>
+											<style is:global>
+												#text-488786638 {
+													font-size: 0.85rem;
+													line-height: 1.2;
+												}
+											</style>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="col-800618987" class="col medium-3 small-6 large-3">
+							<div class="col-inner">
+								<div class="icon-box featured-box icon-box-center text-center">
+									<div class="icon-box-img" style="width: 25px">
+										<div class="icon">
+											<div class="icon-inner">
+												<img
+													loading="lazy"
+													decoding="async"
+													width="33"
+													height="32"
+													src="/images/wp-content/uploads/2024/05/icon-desconto.png"
+													class="attachment-medium size-medium"
+													alt=""
+												/>
+											</div>
+										</div>
+									</div>
+									<div class="icon-box-text last-reset">
+										<div id="text-4264858418" class="text">
+											<h3>ATÉ 15% DE DESCONTO<br />NO PIX</h3>
+											<style is:global>
+												#text-4264858418 {
+													font-size: 0.85rem;
+													line-height: 1.2;
+												}
+											</style>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="col-2095014405" class="col medium-3 small-6 large-3">
+							<div class="col-inner">
+								<div class="icon-box featured-box icon-box-center text-center">
+									<div class="icon-box-img" style="width: 25px">
+										<div class="icon">
+											<div class="icon-inner">
+												<img
+													loading="lazy"
+													decoding="async"
+													width="17"
+													height="17"
+													src="/images/wp-content/uploads/2024/05/telefone.png"
+													class="attachment-medium size-medium"
+													alt=""
+												/>
+											</div>
+										</div>
+									</div>
+									<div class="icon-box-text last-reset">
+										<div id="text-397223611" class="text">
+											<h3>ATENDIMENTO</h3>
+											<h3>24 HORAS</h3>
+											<style is:global>
+												#text-397223611 {
+													font-size: 0.85rem;
+													line-height: 1.2;
+												}
+											</style>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<style is:global>
+					#section_1858715450 {
+						padding-top: 5px;
+						padding-bottom: 5px;
+						background-color: rgb(255, 255, 255);
+					}
+				</style>
+			</section>
+		</div>
+	</main>
+
+	<SiteFooter />
+</Layout>

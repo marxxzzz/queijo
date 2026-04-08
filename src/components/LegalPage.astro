@@ -1,0 +1,57 @@
+---
+import Layout from "./Layout.astro";
+import SiteHeader from "./SiteHeader.astro";
+import SiteFooter from "./SiteFooter.astro";
+import legalPages from "../data/legal-pages.json";
+
+interface Props {
+	pageKey: keyof typeof legalPages;
+}
+
+const { pageKey } = Astro.props;
+const entry = legalPages[pageKey];
+const title = entry?.title ?? String(pageKey);
+const html = entry?.html ?? "";
+---
+
+<Layout title={`${title} | Loja Oficial`} description={title}>
+	<SiteHeader />
+	<main id="main" class="">
+		<div id="content" role="main" class="content-area page-wrapper">
+			<div class="row row-main">
+				<div class="large-12 col">
+					<div class="col-inner legal-page-inner">
+						<h1
+							class="entry-title"
+							style="color: var(--fs-color-primary, #b20000); font-weight: 300; margin-bottom: 1.25rem;"
+						>
+							{title}
+						</h1>
+						<div class="entry-content legal-rte" set:html={html} />
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+	<SiteFooter />
+</Layout>
+
+<style is:global>
+	.legal-page-inner .legal-rte {
+		max-width: 900px;
+		margin: 0 auto 3rem;
+		line-height: 1.65;
+	}
+	.legal-page-inner .legal-rte .has-text-align-center {
+		text-align: center;
+	}
+	.legal-page-inner .legal-rte ul.wp-block-list {
+		margin: 1rem 0 1rem 1.25rem;
+		padding: 0;
+	}
+	.legal-page-inner .legal-rte hr.wp-block-separator {
+		margin: 2rem 0;
+		border: 0;
+		border-top: 1px solid #e8e8e8;
+	}
+</style>

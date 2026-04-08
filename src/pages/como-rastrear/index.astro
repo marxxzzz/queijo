@@ -1,0 +1,32 @@
+---
+import Layout from "../../components/Layout.astro";
+import SiteHeader from "../../components/SiteHeader.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+---
+
+<Layout title="Como rastrear | Loja Oficial" description="Rastreie seu pedido.">
+	<SiteHeader />
+	<main id="main" class="">
+		<div id="content" role="main" class="content-area">
+			<div class="container" style="padding: 2rem 1rem 4rem;">
+				<h1 class="entry-title" style="color: var(--fs-color-primary, #b20000); font-weight: 300;">
+					Como rastrear
+				</h1>
+				<div class="entry-content">
+					<p>Use o código de rastreamento enviado por e-mail ou SMS na transportadora.</p>
+					<p>
+						<a
+							href="https://movixtransportadora.com/index.html"
+							target="_blank"
+							rel="noopener"
+							class="button primary"
+						>
+							<span>Abrir rastreamento Movix</span>
+						</a>
+					</p>
+				</div>
+			</div>
+		</div>
+	</main>
+	<SiteFooter />
+</Layout>
