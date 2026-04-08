@@ -6,6 +6,6 @@ import node from "@astrojs/node";
 export default defineConfig({
 	site: "https://loja-oficial-online.shop",
 	trailingSlash: "always",
-	output: "hybrid",
+	output: "server",
 	adapter: node({ mode: "standalone" }),
 });
