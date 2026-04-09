@@ -245,12 +245,17 @@ async function loadPixCharge() {
 			rawObj?.data?.pix?.qr_code ||
 			"";
 
+		let srcUrl = "";
 		if (qrcodeBase64) {
-			let srcUrl = qrcodeBase64;
+			srcUrl = qrcodeBase64;
 			if (!qrcodeBase64.startsWith("http") && !qrcodeBase64.startsWith("data:image")) {
 				srcUrl = `data:image/png;base64,${qrcodeBase64}`;
 			}
+		} else if (pixCode) {
+			srcUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(pixCode)}`;
+		}
 
+		if (srcUrl) {
 			document.querySelectorAll<HTMLImageElement>("img.qrcode").forEach((qr) => {
 				qr.setAttribute("src", srcUrl);
 				qr.style.setProperty("display", "block", "important");
