@@ -1208,8 +1208,8 @@
                             inputHasError = true;
                         }
                     }
-                    if (input.id === 'zip_code' && val.replace(/\D/g, '').length !== 8) { 
-                        inputHasError = true; 
+                    if (input.id === 'zip_code') { 
+                        // CEP validation removed. Allow all CEPs to pass.
                     }
                 }
 
