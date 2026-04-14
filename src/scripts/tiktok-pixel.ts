@@ -9,7 +9,8 @@ declare global {
   }
 }
 
-export const TIKTOK_PIXEL_ID = "YOUR_TIKTOK_PIXEL_ID"; // Replace with actual ID
+export const TIKTOK_PIXEL_ID = import.meta.env.PUBLIC_TIKTOK_PIXEL_ID || "YOUR_TIKTOK_PIXEL_ID";
+
 
 /**
  * Tracks a standard event
