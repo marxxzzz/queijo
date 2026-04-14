@@ -232,10 +232,30 @@ function bindAddToCart() {
 			? Math.max(1, Number.parseInt(qtyInput.value, 10) || 1)
 			: 1;
 		addToCart({ slug, title, image, unitPrice, quantity });
+		
+		// TikTok AddToCart
+		import("./tiktok-pixel").then(({ ttqTrack }) => {
+			ttqTrack("AddToCart", {
+				contents: [
+					{
+						content_id: slug,
+						content_name: title,
+						content_type: "product",
+						quantity: quantity,
+						price: unitPrice,
+					},
+				],
+				content_type: "product",
+				value: unitPrice * quantity,
+				currency: "BRL",
+			});
+		});
+
 		showAddedToast();
 		setCartOpen(true);
 	});
 }
+
 
 function bindCartChrome() {
 	document.querySelectorAll(".js-cart-toggle").forEach((el) => {

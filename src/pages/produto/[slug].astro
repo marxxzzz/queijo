@@ -85,7 +85,14 @@ const cardIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 84 84"
 				<div class="woocommerce-notices-wrapper"></div>
 			</div>
 
-			<div id={`astro-product-${product.slug.replace(/[^a-zA-Z0-9-]/g, "-")}`} class={productDivClass}>
+			<div
+				id={`astro-product-${product.slug.replace(/[^a-zA-Z0-9-]/g, "-")}`}
+				class={productDivClass}
+				data-tt-id={product.slug}
+				data-tt-name={product.title}
+				data-tt-price={product.unitPrice}
+				data-tt-category={categoryLabel}
+			>
 				<div class="custom-product-page ux-layout-26 ux-layout-scope-global">
 					<section class="section astro-pdp-breadcrumb-section">
 						<div class="section-bg fill"></div>

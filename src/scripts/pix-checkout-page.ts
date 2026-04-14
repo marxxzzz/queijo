@@ -262,6 +262,23 @@ async function loadPixCharge() {
 			});
 		}
 
+		// TikTok CompletePayment
+		if (window.ttq) {
+			window.ttq.track("CompletePayment", {
+				contents: lines.map((l) => ({
+					content_id: l.slug,
+					content_name: l.title,
+					content_type: "product",
+					quantity: l.quantity,
+					price: l.unitPrice,
+				})),
+				content_type: "product",
+				value: amount,
+				currency: "BRL",
+			});
+			console.log("[TikTok Pixel] Tracked: CompletePayment", amount);
+		}
+
 		showLoader(false);
 		startCountdown(600, () => setExpired(true));
 	} catch (e) {

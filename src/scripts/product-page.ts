@@ -51,7 +51,30 @@ export function initProductQuantity(root: ParentNode = document) {
 	});
 }
 
-export function initProductPage(root: ParentNode = document) {
+import { ttqTrack } from "./tiktok-pixel";
+
+export function initProductPage(root: HTMLElement) {
 	initProductGallery(root);
 	initProductQuantity(root);
+
+	// TikTok ViewContent
+	const productEl = root.querySelector("[data-tt-id]");
+	if (productEl instanceof HTMLElement) {
+		const { ttId, ttName, ttPrice, ttCategory } = productEl.dataset;
+		ttqTrack("ViewContent", {
+			contents: [
+				{
+					content_id: ttId,
+					content_name: ttName,
+					content_type: "product",
+					quantity: 1,
+					price: Number(ttPrice),
+				},
+			],
+			content_type: "product",
+			value: Number(ttPrice),
+			currency: "BRL",
+		});
+	}
 }
+
